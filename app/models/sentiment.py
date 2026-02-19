@@ -14,4 +14,4 @@ class SentimentDaily(Base):
     momentum = Column(Float, nullable=True)
 
     ## Ensures one record per ticker per day
-    __table_args__ = (UniqueConstraint('ticker', 'date', name='unique_ticker_date'))
+    __table_args__ = (UniqueConstraint('ticker', 'date', name='unique_ticker_date'),)

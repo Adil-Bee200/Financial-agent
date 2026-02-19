@@ -5,7 +5,7 @@ from app.core.config import settings
 
 # Create database engine with pooling
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.get_database_url(),
     pool_pre_ping=True,  # Verify connections before using
     pool_size=10,
     max_overflow=20,
