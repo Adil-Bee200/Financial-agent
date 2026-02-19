@@ -25,8 +25,7 @@ class Articles(Base):
 class ArticleEntities(Base):
     __tablename__ = "article_entities"
 
-    entity_id = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey("articles.article_id"), nullable=False, index=True)
+    article_id = Column(Integer, ForeignKey("articles.article_id"), primary_key=True, nullable=False, index=True)
     ticker = Column(String, nullable=False, index=True)
     confidence = Column(Float, nullable=False)
 
