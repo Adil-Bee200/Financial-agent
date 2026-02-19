@@ -12,7 +12,7 @@ class User(BaseModel):
 class Alerts(BaseModel):
     alert_id: int
     ticker: str 
-    tigger_reason: str 
+    trigger_reason: str 
     sentiment_value: float
     created_at: datetime
 
