@@ -11,9 +11,11 @@ import requests
 import json 
 from app.core.config import settings
 from typing import List, Dict, Any
+from redis import Redis
 
 logger = logging.getLogger(__name__)
 
+QUEUE_NAME = "article_queue"
 
 class ArticleIngestionService:
     """
@@ -39,6 +41,8 @@ class ArticleIngestionService:
             raise ValueError("News API key is required. Set NEWS_API_KEY in .env")
         if not self.news_api_base_url:
             raise ValueError("News API base URL is required. Set NEWS_API_BASE_URL in .env")
+
+        self.redis_client = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
         
         
         self.news_api_endpoint = f"{self.news_api_base_url}/everything"
@@ -69,15 +73,16 @@ class ArticleIngestionService:
             logger.error(f"Error fetching articles from the news API: {e}")
             return []
         
-    def queue_articles(self, articles: List[Dict[str, Any]]) -> None:
+    def queue_articles(self, articles: List[Dict[str, Any]]) -> bool:
         """
-        Queue articles for processing
+        Queue articles for processing. Returns True if successful, False otherwise.
         """
         try:
             for article in articles:
-                self.queue.put(article)
+                self.redis_client.lpush(QUEUE_NAME, json.dumps(article))
+            logger.info(f"Queued {len(articles)} articles for processing")
+            return True 
         except Exception as e:
             logger.error(f"Error queuing articles for processing: {e}")
-            return []
-    
-    
+            return False
+
