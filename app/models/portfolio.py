@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -19,15 +19,20 @@ class Portfolio(Base):
     tickers = relationship("PortfolioTickers", back_populates="portfolio", cascade="all, delete-orphan")  ## if relationship is severed, all children are deleted
                                                                                                           ## whereas cascade deletes children only when parent is deleted
     
-    alerts = relationship("Alert", back_populates="portfolio", cascade="all, delete-orphan")
+    alerts = relationship("Alerts", back_populates="portfolio", cascade="all, delete-orphan")
 
 
 class PortfolioTickers(Base):
     __tablename__ = "portfolio_tickers"
 
     ticker_id = Column(Integer, primary_key=True)
-    portfolio_id = Column(Integer, ForeignKey("portfolios.portfolio_id"), unique=True, nullable=False, index=True)
+    portfolio_id = Column(Integer, ForeignKey("portfolios.portfolio_id"), nullable=False, index=True)
     ticker = Column(String, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     portfolio = relationship("Portfolio", back_populates="tickers")
+    
+    # Ensure one ticker per portfolio (can't add same ticker twice to same portfolio)
+    __table_args__ = (
+        UniqueConstraint('portfolio_id', 'ticker', name='unique_portfolio_ticker'),
+    )

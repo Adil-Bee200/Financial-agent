@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -23,11 +23,13 @@ class Articles(Base):
 
 
 class ArticleEntities(Base):
-    __tablename__ = "article_entities"
+    """Maps an article to one ticker mention; composite PK allows multiple tickers per article."""
 
-    article_id = Column(Integer, ForeignKey("articles.article_id"), primary_key=True, nullable=False, index=True)
+    __tablename__ = "article_entities"
+    __table_args__ = (PrimaryKeyConstraint("article_id", "ticker", name="article_entities_pkey"),)
+
+    article_id = Column(Integer, ForeignKey("articles.article_id", ondelete="CASCADE"), nullable=False)
     ticker = Column(String, nullable=False, index=True)
     confidence = Column(Float, nullable=False)
 
-    # Relationships
     article = relationship("Articles", back_populates="entities")
