@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr, HttpUrl
 
 
@@ -16,11 +16,11 @@ class Alerts(BaseModel):
     created_at: datetime
 
 class SentimentDaily(BaseModel):
-    ticker: str 
-    date: datetime 
+    ticker: str
+    date: datetime
     avg_sentiment: float
-    article_count: int 
-    momentum: float
+    article_count: int
+    momentum: Optional[float] = None
 
 class Portfolio(BaseModel):
     portfolio_id: int 
@@ -36,14 +36,14 @@ class ArticleEntities(BaseModel):
 class Articles(BaseModel):
     article_id: int
     title: str
-    source: str 
+    source: str
     url: HttpUrl
     published_at: datetime
-    summary: str 
-    sentiment_score: float 
-    relevance_score: float
+    summary: Optional[str] = None
+    sentiment_score: Optional[float] = None
+    relevance_score: Optional[float] = None
     created_at: datetime
-    processed_at: datetime      
+    processed_at: Optional[datetime] = None
 
 class PortfolioTickers(BaseModel):
     ticker_id: int

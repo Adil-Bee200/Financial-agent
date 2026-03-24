@@ -70,11 +70,15 @@ class PortfolioService:
             raise HTTPException(status_code=404, detail="Portfolio not found")
         return portfolio
 
-    def update_portfolio(self, portfolio_id: int, portfolio: Portfolio) -> Portfolio:
-        self.db.query(Portfolio).filter(Portfolio.portfolio_id == portfolio_id).update(portfolio.model_dump())
+    def update_portfolio(self, portfolio_id: int, name: str) -> Portfolio:
+        existing = self.get_portfolio(portfolio_id)
+        stripped = name.strip()
+        if not stripped:
+            raise HTTPException(status_code=400, detail="Portfolio name cannot be empty")
+        existing.name = stripped
         self.db.commit()
-        self.db.refresh(portfolio)
-        return portfolio
+        self.db.refresh(existing)
+        return existing
 
     def delete_portfolio(self, portfolio_id: int) -> None:
         self.db.query(Portfolio).filter(Portfolio.portfolio_id == portfolio_id).delete()
