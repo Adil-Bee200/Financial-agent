@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.alert import Alerts
+from app.services.alerts.discord_notifier import send_discord_alert_if_configured
 from app.services.sentiment.sentiment_service import SentimentService
 
 logger = logging.getLogger(__name__)
@@ -93,10 +94,16 @@ class AlertService:
         return None
 
     def create_alert(self, ticker: str, trigger_reason: str, sentiment_value: float, portfolio_id: int) -> Alerts:
-        alert = Alerts(ticker=ticker, trigger_reason=trigger_reason, sentiment_value=sentiment_value, portfolio_id=portfolio_id,)
+        alert = Alerts(
+            ticker=ticker,
+            trigger_reason=trigger_reason,
+            sentiment_value=sentiment_value,
+            portfolio_id=portfolio_id,
+        )
         self.db.add(alert)
         self.db.commit()
         self.db.refresh(alert)
+        send_discord_alert_if_configured(alert)
         return alert
 
     def get_alerts_for_portfolio(self, portfolio_id: int) -> List[Alerts]:
